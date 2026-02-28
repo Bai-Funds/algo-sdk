@@ -1,0 +1,22 @@
+[package]
+name = "speed-test-algo"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Local development:
+algo-sdk = { package = "sequence-algo-sdk", path = "../..", default-features = false }
+# From crates.io:
+# sequence-algo-sdk = { version = "0.1", default-features = false }
+wee_alloc = "0.4"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"

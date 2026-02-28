@@ -1,0 +1,28 @@
+[package]
+name = "sequence-algo-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Sequence Markets Algo SDK — write HFT trading algos in Rust, compile to WASM, deploy to Sequence"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Sequence-Markets/algo-sdk"
+homepage = "https://sequencemkts.com"
+documentation = "https://docs.rs/sequence-algo-sdk"
+readme = "README.md"
+keywords = ["trading", "hft", "wasm", "algo", "market-making"]
+categories = ["algorithms", "wasm"]
+authors = ["Sequence Markets <engineering@sequencemkts.com>"]
+include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+[features]
+# std enabled by default for native compilation
+default = ["std"]
+std = []
+# Enable WASM exports for deployment to Sequence servers
+wasm = []
+
+[dependencies]
+# Minimal dependencies for client algo development
+
+[lib]
+name = "algo_sdk"
+crate-type = ["lib"]  # Library only - clients compile their algos as cdylib
