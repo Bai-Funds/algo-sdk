@@ -14,7 +14,6 @@ crate-type = ["cdylib"]
 algo-sdk = { package = "sequence-algo-sdk", path = "../..", default-features = false }
 # From crates.io:
 # sequence-algo-sdk = { version = "0.1", default-features = false }
-wee_alloc = "0.4"
 
 [profile.release]
 opt-level = "z"

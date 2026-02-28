@@ -20,7 +20,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 sequence-algo-sdk = { version = "0.1", default-features = false }
-wee_alloc = "0.4"
 
 [profile.release]
 opt-level = "z"
@@ -60,13 +59,11 @@ export_algo!(MyAlgo { next_id: 0 });
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo) -> ! { loop {} }
 
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 ```
 
 ## Build & Deploy
 
-Install the [Sequence CLI](https://github.com/Sequence-Markets/algo-sdk/releases) and deploy:
+Install the [Sequence CLI](https://github.com/Bai-Funds/algo-sdk/releases) and deploy:
 
 ```bash
 sequence build

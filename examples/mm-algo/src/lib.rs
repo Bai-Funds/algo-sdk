@@ -464,8 +464,6 @@ mod wasm {
         loop {}
     }
     
-    #[global_allocator]
-    static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 }
 
 // Empty module for native builds
