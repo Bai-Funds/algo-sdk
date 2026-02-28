@@ -94,7 +94,7 @@ main() {
 
     # Verify checksum
     echo "Verifying checksum..."
-    EXPECTED="$(grep "${ARCHIVE}" "${TMPDIR}/checksums.txt" | awk '{print $1}')"
+    EXPECTED="$(grep -F "${ARCHIVE}" "${TMPDIR}/checksums.txt" | awk '{print $1}')"
     if [ -z "$EXPECTED" ]; then
         echo "Error: No checksum found for ${ARCHIVE}" >&2
         exit 1
@@ -105,8 +105,8 @@ main() {
     elif command -v shasum >/dev/null 2>&1; then
         ACTUAL="$(shasum -a 256 "${TMPDIR}/${ARCHIVE}" | awk '{print $1}')"
     else
-        echo "Warning: No sha256sum or shasum found, skipping verification" >&2
-        ACTUAL="$EXPECTED"
+        echo "Error: No sha256sum or shasum found — cannot verify download integrity" >&2
+        exit 1
     fi
 
     if [ "$ACTUAL" != "$EXPECTED" ]; then
@@ -117,13 +117,29 @@ main() {
     fi
     echo "Checksum OK"
 
+    # Verify cosign signature if cosign is available
+    SIG_URL="https://github.com/${REPO}/releases/download/${TAG}/${ARCHIVE}.sig"
+    PEM_URL="https://github.com/${REPO}/releases/download/${TAG}/${ARCHIVE}.pem"
+    if command -v cosign >/dev/null 2>&1; then
+        echo "Verifying Sigstore signature..."
+        curl -fsSL -H "$(auth_header)" -o "${TMPDIR}/${ARCHIVE}.sig" "$SIG_URL" 2>/dev/null && \
+        curl -fsSL -H "$(auth_header)" -o "${TMPDIR}/${ARCHIVE}.pem" "$PEM_URL" 2>/dev/null && \
+        cosign verify-blob \
+            --signature "${TMPDIR}/${ARCHIVE}.sig" \
+            --certificate "${TMPDIR}/${ARCHIVE}.pem" \
+            --certificate-identity-regexp "github.com/Bai-Funds" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            "${TMPDIR}/${ARCHIVE}" && echo "Signature OK" || \
+        echo "Warning: Signature verification failed (binary checksum was OK)" >&2
+    fi
+
     # Extract
     tar xzf "${TMPDIR}/${ARCHIVE}" -C "${TMPDIR}"
 
     # Install
     mkdir -p "$INSTALL_DIR"
     mv "${TMPDIR}/${BINARY}" "${INSTALL_DIR}/${BINARY}"
-    chmod +x "${INSTALL_DIR}/${BINARY}"
+    chmod 755 "${INSTALL_DIR}/${BINARY}"
 
     echo ""
     echo "Installed ${BINARY} v${VERSION} to ${INSTALL_DIR}/${BINARY}"
