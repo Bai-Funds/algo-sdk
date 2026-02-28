@@ -2,7 +2,7 @@
 # Sequence CLI installer
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/Sequence-Markets/algo-sdk/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/Bai-Funds/algo-sdk/main/install.sh | sh
 #
 # Installs the latest `sequence` binary to ~/.local/bin (or /usr/local/bin with sudo).
 # Verifies SHA-256 checksum before installing.
@@ -14,7 +14,7 @@
 set -e
 
 # When releases move to the public repo, update this:
-REPO="${SEQUENCE_CLI_REPO:-Sequence-Markets/algo-sdk}"
+REPO="${SEQUENCE_CLI_REPO:-Bai-Funds/algo-sdk}"
 BINARY="sequence"
 INSTALL_DIR="${SEQUENCE_INSTALL_DIR:-$HOME/.local/bin}"
 
