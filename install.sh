@@ -163,17 +163,42 @@ main() {
     echo ""
     echo "Installed ${BINARY} v${VERSION} to ${INSTALL_DIR}/${BINARY}${EXE}"
 
-    # Check if install dir is in PATH
+    # Auto-add install dir to PATH if not already present
     case ":$PATH:" in
         *":${INSTALL_DIR}:"*) ;;
         *)
-            echo ""
-            echo "Add to your PATH:"
-            echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""
-            echo ""
-            echo "Or add to your shell profile (~/.zshrc or ~/.bashrc)."
+            # Detect shell profile
+            PROFILE=""
+            if [ -n "$ZSH_VERSION" ] || [ "$(basename "$SHELL")" = "zsh" ]; then
+                PROFILE="$HOME/.zshrc"
+            elif [ -f "$HOME/.bashrc" ]; then
+                PROFILE="$HOME/.bashrc"
+            elif [ -f "$HOME/.bash_profile" ]; then
+                PROFILE="$HOME/.bash_profile"
+            elif [ -f "$HOME/.profile" ]; then
+                PROFILE="$HOME/.profile"
+            fi
+
+            if [ -n "$PROFILE" ]; then
+                echo "" >> "$PROFILE"
+                echo "# Sequence CLI" >> "$PROFILE"
+                echo "export PATH=\"${INSTALL_DIR}:\$PATH\"" >> "$PROFILE"
+                export PATH="${INSTALL_DIR}:$PATH"
+                echo "Added ${INSTALL_DIR} to PATH in ${PROFILE}"
+                echo ""
+                echo "Restart your terminal or run: source ${PROFILE}"
+            else
+                echo ""
+                echo "Add to your PATH:"
+                echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""
+            fi
             ;;
     esac
+
+    echo ""
+    echo "Then run:"
+    echo "  sequence login"
+    echo "  sequence init my-algo"
 }
 
 main
