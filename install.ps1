@@ -19,10 +19,19 @@ $InstallDir = if ($env:SEQUENCE_INSTALL_DIR) { $env:SEQUENCE_INSTALL_DIR } else 
 # --- Detect architecture ---
 
 function Get-Target {
-    $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+    # PowerShell 7+ has RuntimeInformation; PowerShell 5.1 does not.
+    # Fall back to the PROCESSOR_ARCHITECTURE env var (always available on Windows).
+    $arch = $null
+    try {
+        $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+    } catch {
+        $arch = $env:PROCESSOR_ARCHITECTURE   # AMD64, ARM64, x86
+    }
     switch ($arch) {
-        "X64"   { return "x86_64-pc-windows-msvc" }
-        "Arm64" { return "aarch64-pc-windows-msvc" }
+        "X64"    { return "x86_64-pc-windows-msvc" }
+        "AMD64"  { return "x86_64-pc-windows-msvc" }
+        "Arm64"  { return "aarch64-pc-windows-msvc" }
+        "ARM64"  { return "aarch64-pc-windows-msvc" }
         default {
             Write-Error "Unsupported architecture: $arch"
             exit 1
