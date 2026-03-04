@@ -27,8 +27,12 @@ detect_target() {
     case "$OS" in
         Darwin) os="apple-darwin" ;;
         Linux)  os="unknown-linux-gnu" ;;
+        MINGW*|MSYS*|CYGWIN*|Windows_NT)
+            os="pc-windows-msvc"
+            ;;
         *)
             echo "Error: Unsupported OS: $OS" >&2
+            echo "  Windows users: use install.ps1 (PowerShell) or download from Releases." >&2
             exit 1
             ;;
     esac
@@ -69,7 +73,12 @@ latest_tag() {
 
 main() {
     TARGET="$(detect_target)"
-    ARCHIVE="sequence-${TARGET}.tar.gz"
+
+    # Windows uses .zip archives; Unix uses .tar.gz
+    case "$TARGET" in
+        *windows*) ARCHIVE="sequence-${TARGET}.zip" ; EXE=".exe" ;;
+        *)         ARCHIVE="sequence-${TARGET}.tar.gz" ; EXE="" ;;
+    esac
 
     echo "Detecting platform... ${TARGET}"
 
@@ -134,15 +143,25 @@ main() {
     fi
 
     # Extract
-    tar xzf "${TMPDIR}/${ARCHIVE}" -C "${TMPDIR}"
+    case "$ARCHIVE" in
+        *.zip)
+            unzip -q "${TMPDIR}/${ARCHIVE}" -d "${TMPDIR}" || {
+                echo "Error: unzip failed. Install unzip or download manually." >&2
+                exit 1
+            }
+            ;;
+        *.tar.gz)
+            tar xzf "${TMPDIR}/${ARCHIVE}" -C "${TMPDIR}"
+            ;;
+    esac
 
     # Install
     mkdir -p "$INSTALL_DIR"
-    mv "${TMPDIR}/${BINARY}" "${INSTALL_DIR}/${BINARY}"
-    chmod 755 "${INSTALL_DIR}/${BINARY}"
+    mv "${TMPDIR}/${BINARY}${EXE}" "${INSTALL_DIR}/${BINARY}${EXE}"
+    chmod 755 "${INSTALL_DIR}/${BINARY}${EXE}"
 
     echo ""
-    echo "Installed ${BINARY} v${VERSION} to ${INSTALL_DIR}/${BINARY}"
+    echo "Installed ${BINARY} v${VERSION} to ${INSTALL_DIR}/${BINARY}${EXE}"
 
     # Check if install dir is in PATH
     case ":$PATH:" in
