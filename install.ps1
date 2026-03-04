@@ -125,15 +125,21 @@ try {
     Write-Host ""
     Write-Host "Installed sequence v$Version to $InstallDir\$Binary"
 
-    # Check if install dir is in PATH
+    # Auto-add install dir to PATH if not already present
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
     if ($currentPath -notlike "*$InstallDir*") {
+        $newPath = "$InstallDir;$currentPath"
+        [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+        $env:Path = "$InstallDir;$env:Path"
+        Write-Host "Added $InstallDir to your PATH."
         Write-Host ""
-        Write-Host "Add to your PATH (run once):"
-        Write-Host "  [Environment]::SetEnvironmentVariable('Path', `"$InstallDir;`$env:Path`", 'User')"
+        Write-Host "Restart your terminal, then run:"
+    } else {
         Write-Host ""
-        Write-Host "Or add $InstallDir to your PATH in System Settings."
+        Write-Host "Run:"
     }
+    Write-Host "  sequence login"
+    Write-Host "  sequence init my-algo"
 } finally {
     # Cleanup
     Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
